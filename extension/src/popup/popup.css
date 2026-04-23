@@ -25,7 +25,8 @@ html, body {
 }
 
 body {
-  width: 340px;
+  /* Wider so tool names + descriptions + toggles don’t feel cramped */
+  width: 420px;
 }
 
 .card {
