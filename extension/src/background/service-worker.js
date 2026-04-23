@@ -6,3 +6,9 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("[Nexvia Novia] installed");
 });
 
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "nn-reload-extension") {
+    chrome.runtime.reload();
+  }
+});
+
