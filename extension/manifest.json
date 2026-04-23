@@ -20,6 +20,15 @@
     "service_worker": "src/background/service-worker.js",
     "type": "module"
   },
+  "commands": {
+    "nn-reload-extension": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+R",
+        "mac": "Command+Shift+R"
+      },
+      "description": "Reload Nexvia Novia (dev helper)"
+    }
+  },
   "content_scripts": [
     {
       "matches": [
