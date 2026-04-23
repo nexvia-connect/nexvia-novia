@@ -52,6 +52,56 @@ const NN_THEME_CSS = `
 .nn-badges { display:flex; flex-wrap: wrap; gap: 8px; }
 .nn-badge { background: #2c2c2c; color: var(--nn-text-dim); padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 650; border: 1px solid var(--nn-border-2); }
 .nn-badge.nn-active { background: rgba(16, 163, 127, 0.15); color: var(--nn-green-2); border-color: rgba(16, 163, 127, 0.4); }
+
+/* Minimized pill */
+.nn-minipill {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: var(--nn-z);
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--nn-border);
+  background: rgba(16, 16, 16, 0.92);
+  color: #fff;
+  box-shadow: var(--nn-shadow-2);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+.nn-minipill:hover { background: rgba(22, 22, 22, 0.96); border-color: #444; }
+.nn-minipill:active { transform: translateY(1px); }
+.nn-minipill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 163, 127, 0.55);
+  background: rgba(16, 163, 127, 0.18);
+  color: var(--nn-green-2);
+  font-weight: 950;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+.nn-minipill-label { font-weight: 850; letter-spacing: 1.2px; font-size: 11px; }
+
+/* Morph-ish transitions */
+.nn-hidden {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none !important;
+}
+.nn-card {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
 `;
 
 function ensureOverlayHost() {
@@ -114,6 +164,70 @@ function makeDraggable({ dragHandleEl, targetEl }) {
   });
 }
 
+function clampToViewport(el) {
+  const rect = el.getBoundingClientRect();
+  const maxX = Math.max(0, window.innerWidth - rect.width);
+  const maxY = Math.max(0, window.innerHeight - rect.height);
+  const x = Math.min(Math.max(0, rect.left), maxX);
+  const y = Math.min(Math.max(0, rect.top), maxY);
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  el.style.right = "auto";
+  el.style.bottom = "auto";
+}
+
+function ensureMinipill(overlay, id) {
+  const pillId = `nn-minipill-${id}`;
+  let pill = overlay.querySelector(`#${CSS.escape(pillId)}`);
+  if (pill) return pill;
+
+  pill = document.createElement("div");
+  pill.id = pillId;
+  pill.className = "nn-minipill nn-hidden";
+  pill.innerHTML = `<span class="nn-minipill-badge">N</span><span class="nn-minipill-label">NOVIA</span>`;
+  overlay.appendChild(pill);
+
+  // make pill draggable by itself
+  makeDraggable({ dragHandleEl: pill, targetEl: pill });
+
+  // Convert from bottom/right anchoring to left/top once dragged
+  pill.addEventListener("mousedown", () => {
+    const rect = pill.getBoundingClientRect();
+    pill.style.left = `${rect.left}px`;
+    pill.style.top = `${rect.top}px`;
+    pill.style.right = "auto";
+    pill.style.bottom = "auto";
+  }, { once: true });
+
+  return pill;
+}
+
+function nnMinimizeCard({ overlay, card }) {
+  const id = card.dataset.nnId || "card";
+  const pill = ensureMinipill(overlay, id);
+
+  // ensure card has absolute position (so restore is "where you left it")
+  if (card.style.transform && card.style.transform.includes("translate")) {
+    const rect = card.getBoundingClientRect();
+    card.style.transform = "none";
+    card.style.left = `${rect.left}px`;
+    card.style.top = `${rect.top}px`;
+    card.style.right = "auto";
+  }
+
+  clampToViewport(card);
+
+  // hide card, show pill
+  card.classList.add("nn-hidden");
+  pill.classList.remove("nn-hidden");
+
+  pill.onclick = () => {
+    pill.classList.add("nn-hidden");
+    card.classList.remove("nn-hidden");
+    clampToViewport(card);
+  };
+}
+
 async function ensureOverlay() {
   const host = ensureOverlayHost();
   const shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
@@ -171,8 +285,8 @@ async function nnCreateCard({ id, title, width = 420, anchor = "center" }) {
 
   overlay.appendChild(card);
 
-  // Wire close button (removes just this card)
-  card.querySelector("[data-nn-close]").addEventListener("click", () => card.remove());
+  // Wire close button (minimize to NOVIA pill)
+  card.querySelector("[data-nn-close]").addEventListener("click", () => nnMinimizeCard({ overlay, card }));
 
   // Enable dragging by header
   makeDraggable({
