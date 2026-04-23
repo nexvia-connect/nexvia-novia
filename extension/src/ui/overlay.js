@@ -6,6 +6,52 @@
 
 const OVERLAY_ID = "nn-overlay-host";
 
+// Inline theme CSS to avoid any resource fetching issues
+// (some sites + MV3 setups can block loading extension CSS via <link>).
+const NN_THEME_CSS = `
+:host, :root {
+  --nn-font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --nn-z: 2147483000;
+  --nn-bg: #0f0f10;
+  --nn-panel: #1e1e1e;
+  --nn-panel-2: #252525;
+  --nn-border: #333;
+  --nn-border-2: #404040;
+  --nn-text: #eaeaea;
+  --nn-text-dim: #a3a3a3;
+  --nn-green: #2e7d32;
+  --nn-green-2: #10a37f;
+  --nn-red: #d9534f;
+  --nn-radius: 12px;
+  --nn-radius-sm: 10px;
+  --nn-shadow: 0 10px 40px rgba(0, 0, 0, 0.40);
+  --nn-shadow-2: 0 10px 30px rgba(0, 0, 0, 0.80);
+}
+.nn-overlay { position: fixed; inset: 0; pointer-events: none; z-index: var(--nn-z); font-family: var(--nn-font); }
+.nn-card { pointer-events: auto; background: var(--nn-panel); color: var(--nn-text); border: 1px solid var(--nn-border); border-radius: var(--nn-radius); box-shadow: var(--nn-shadow); overflow: hidden; }
+.nn-header { background: var(--nn-panel-2); border-bottom: 1px solid var(--nn-border); padding: 14px 20px; display:flex; align-items:center; justify-content:space-between; cursor: grab; user-select:none; }
+.nn-title { font-size: 14px; font-weight: 650; letter-spacing: 0.5px; }
+.nn-close { cursor:pointer; color: var(--nn-text-dim); font-size: 16px; line-height:1; padding: 4px 6px; border-radius: 8px; }
+.nn-close:hover { color: var(--nn-text); background: rgba(255,255,255,0.06); }
+.nn-body { padding: 20px; }
+.nn-img { width:100%; height: 220px; object-fit: cover; display:block; border-radius: var(--nn-radius-sm); border: 1px solid var(--nn-border); margin-bottom: 12px; box-sizing: border-box; }
+.nn-row { display:flex; gap: 12px; align-items: stretch; }
+.nn-input { flex:1; height: 38px; padding: 0 12px; border: 1px solid var(--nn-border); background: #000; color: var(--nn-text); border-radius: var(--nn-radius-sm); font-size: 13px; outline:none; box-shadow:none; }
+.nn-input:focus { border-color: rgba(16, 163, 127, 0.55); box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12); }
+.nn-btn { height: 38px; min-width: 38px; padding: 0 12px; border-radius: var(--nn-radius-sm); cursor:pointer; border: 1px solid #555; background: #333; color: var(--nn-text); display:inline-flex; align-items:center; justify-content:center; gap: 8px; font-weight: 700; font-size: 12px; letter-spacing: 0.3px; transition: background 0.18s ease, border-color 0.18s ease, transform 0.06s ease, box-shadow 0.18s ease, color 0.18s ease; }
+.nn-btn:hover { border-color: #666; background: #3b3b3b; }
+.nn-btn:active { transform: translateY(1px); }
+.nn-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.nn-btn-primary { background: var(--nn-green-2); border-color: rgba(16, 163, 127, 0.65); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.nn-btn-primary:hover { background: #0e906f; }
+.nn-btn-ghost { background: transparent; border-color: var(--nn-border-2); color: var(--nn-text-dim); }
+.nn-btn-ghost:hover { color: var(--nn-text); background: rgba(255,255,255,0.06); border-color: #555; }
+.nn-tooltip { position:absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: var(--nn-green); color:#fff; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; opacity: 0; transition: opacity 0.2s; pointer-events:none; white-space:nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+.nn-badges { display:flex; flex-wrap: wrap; gap: 8px; }
+.nn-badge { background: #2c2c2c; color: var(--nn-text-dim); padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 650; border: 1px solid var(--nn-border-2); }
+.nn-badge.nn-active { background: rgba(16, 163, 127, 0.15); color: var(--nn-green-2); border-color: rgba(16, 163, 127, 0.4); }
+`;
+
 function ensureOverlayHost() {
   let host = document.getElementById(OVERLAY_ID);
   if (host) return host;
@@ -18,13 +64,11 @@ function ensureOverlayHost() {
 }
 
 function ensureThemeCss(shadow) {
-  if (shadow.getElementById("nn-theme-link")) return;
-  const cssUrl = chrome.runtime.getURL("src/ui/theme.css");
-  const linkEl = document.createElement("link");
-  linkEl.id = "nn-theme-link";
-  linkEl.rel = "stylesheet";
-  linkEl.href = cssUrl;
-  shadow.prepend(linkEl);
+  if (shadow.getElementById("nn-theme-style")) return;
+  const styleEl = document.createElement("style");
+  styleEl.id = "nn-theme-style";
+  styleEl.textContent = NN_THEME_CSS;
+  shadow.prepend(styleEl);
 }
 
 function makeDraggable({ dragHandleEl, targetEl }) {
