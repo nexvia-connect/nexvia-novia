@@ -8,6 +8,11 @@ const TOOLS = [
     key: "tool.listingPageFormatCommand",
     name: "Format Changer",
     desc: "pro.immotop.lu: apply formats via upgrade=..."
+  },
+  {
+    key: "tool.addAgentToNexviaSite",
+    name: "Add Agent to Nexvia Site",
+    desc: "nexvia.lu/buy: add agent portrait button that copies agent email"
   }
 ];
 
