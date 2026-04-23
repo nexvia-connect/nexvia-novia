@@ -9,8 +9,9 @@
   --nn-text: #eaeaea;
   --nn-text-dim: #a3a3a3;
   --nn-green-2: #10a37f;
-  --nn-radius: 12px;
-  --nn-radius-sm: 10px;
+  /* Keep the extension popup visually square (Chrome already rounds the window) */
+  --nn-radius: 0px;
+  --nn-radius-sm: 0px;
   --nn-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -53,7 +54,7 @@ body {
   justify-content: center;
   height: 24px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: 0;
   background: #101010;
   border: 1px solid var(--nn-border);
   color: #fff;
@@ -118,7 +119,7 @@ body {
   gap: 10px;
   border: 1px solid var(--nn-border-2);
   background: rgba(255,255,255,0.03);
-  border-radius: var(--nn-radius-sm);
+  border-radius: 0;
   padding: 10px 12px;
 }
 
@@ -140,7 +141,7 @@ body {
 .pill {
   width: 38px;
   height: 22px;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid var(--nn-border-2);
   background: #1a1a1a;
   position: relative;
@@ -151,11 +152,11 @@ body {
   content: "";
   position: absolute;
   top: 50%;
-  left: 3px;
+  left: 2px;
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: 0;
   background: #bdbdbd;
   transition: left 0.18s ease, background 0.18s ease;
 }
@@ -166,7 +167,7 @@ body {
 }
 
 .switch input:checked + .pill::after {
-  left: 19px;
+  left: 20px;
   background: var(--nn-green-2);
 }
 
@@ -179,7 +180,7 @@ body {
 .btn {
   height: 34px;
   padding: 0 12px;
-  border-radius: var(--nn-radius-sm);
+  border-radius: 0;
   border: 1px solid var(--nn-border-2);
   background: transparent;
   color: var(--nn-text-dim);
