@@ -75,7 +75,7 @@
 
     const card = await window.NexviaNoviaUI.createCard({
       id: "listing-format-command",
-      title: "Format upgrade",
+      title: "Format Changer",
       width: 480,
       anchor: "center"
     });
