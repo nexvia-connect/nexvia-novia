@@ -14,12 +14,12 @@ const ASSIST = [
 const ENHANCEMENTS = [
   {
     key: "tool.addAgentToNexviaSite",
-    name: "Agent contact chip (Nexvia Buy)",
+    name: "Agent Chip",
     desc: "nexvia.lu/buy: add a small portrait chip; click copies the agent email"
   },
   {
     key: "tool.easyUiCleanerV321",
-    name: "Easy UI field cleaner (v3.21)",
+    name: "Easy Cleaner",
     desc: "easy-serveur: hide noisy form blocks; includes remote defaults + editor"
   }
 ];
@@ -82,15 +82,9 @@ function setTab(tab) {
   if (rootTitle) rootTitle.textContent = isAssist ? "Assist" : "Enhancements";
   if (rootSubtitle) {
     rootSubtitle.textContent = isAssist
-      ? "Active workflows (popups and actions your team uses daily)"
-      : "Quiet page improvements (chips, cleaners, micro-UI that stays out of the way)";
+      ? "Active workflows and actions your team uses daily"
+      : "Quiet page improvements, chips, cleaners, micro-UI that stays out of the way";
   }
-}
-
-function getCurrentTab() {
-  const enhancementsHidden = document.getElementById("panelEnhancements")?.hidden;
-  if (typeof enhancementsHidden === "boolean" && !enhancementsHidden) return "enhancements";
-  return "assist";
 }
 
 async function render() {
@@ -120,12 +114,6 @@ async function render() {
     await chrome.storage.local.set({ nnPopupTab: saved });
   }
 
-  const enableKeyset = (keys, on) => {
-    const next = {};
-    keys.forEach((k) => (next[k] = on));
-    return next;
-  };
-
   document.getElementById("tabAssist").onclick = async () => {
     setTab("assist");
     await chrome.storage.local.set({ nnPopupTab: "assist" });
@@ -133,19 +121,6 @@ async function render() {
   document.getElementById("tabEnhancements").onclick = async () => {
     setTab("enhancements");
     await chrome.storage.local.set({ nnPopupTab: "enhancements" });
-  };
-
-  document.getElementById("enableAll").onclick = async () => {
-    const tab = getCurrentTab();
-    if (tab === "assist") await setToolStates(enableKeyset(ASSIST.map((t) => t.key), true));
-    else await setToolStates(enableKeyset(ENHANCEMENTS.map((t) => t.key), true));
-    await render();
-  };
-  document.getElementById("disableAll").onclick = async () => {
-    const tab = getCurrentTab();
-    if (tab === "assist") await setToolStates(enableKeyset(ASSIST.map((t) => t.key), false));
-    else await setToolStates(enableKeyset(ENHANCEMENTS.map((t) => t.key), false));
-    await render();
   };
 }
 
