@@ -127,11 +127,13 @@ function makeDraggable({ dragHandleEl, targetEl }) {
   let isDragging = false;
   let startX = 0;
   let startY = 0;
+  let moved = false;
 
   const onMove = (e) => {
     if (!isDragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
+    if (!moved && (Math.abs(dx) + Math.abs(dy) >= 4)) moved = true;
     startX = e.clientX;
     startY = e.clientY;
 
@@ -146,10 +148,19 @@ function makeDraggable({ dragHandleEl, targetEl }) {
     dragHandleEl.style.cursor = "grab";
     window.removeEventListener("mousemove", onMove);
     window.removeEventListener("mouseup", onUp);
+
+    // If the user dragged, suppress the immediate click that can fire on mouseup.
+    if (moved) {
+      targetEl.dataset.nnJustDragged = "1";
+      window.setTimeout(() => {
+        delete targetEl.dataset.nnJustDragged;
+      }, 0);
+    }
   };
 
   dragHandleEl.addEventListener("mousedown", (e) => {
     isDragging = true;
+    moved = false;
     startX = e.clientX;
     startY = e.clientY;
 
@@ -222,6 +233,7 @@ function nnMinimizeCard({ overlay, card }) {
   pill.classList.remove("nn-hidden");
 
   pill.onclick = () => {
+    if (pill.dataset.nnJustDragged === "1") return;
     pill.classList.add("nn-hidden");
     card.classList.remove("nn-hidden");
     clampToViewport(card);
