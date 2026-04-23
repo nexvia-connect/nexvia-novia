@@ -30,6 +30,8 @@ const NN_THEME_CSS = `
 .nn-overlay { position: fixed; inset: 0; pointer-events: none; z-index: var(--nn-z); font-family: var(--nn-font); }
 .nn-card { pointer-events: auto; background: var(--nn-panel); color: var(--nn-text); border: 1px solid var(--nn-border); border-radius: var(--nn-radius); box-shadow: var(--nn-shadow); overflow: hidden; }
 .nn-header { background: var(--nn-panel-2); border-bottom: 1px solid var(--nn-border); padding: 14px 20px; display:flex; align-items:center; justify-content:space-between; cursor: grab; user-select:none; }
+.nn-header-left { display:flex; align-items:center; gap: 12px; min-width: 0; }
+.nn-brand { display:inline-flex; align-items:center; justify-content:center; height: 24px; padding: 0 10px; border-radius: 999px; background: #101010; border: 1px solid var(--nn-border); color: #fff; font-weight: 850; letter-spacing: 1.2px; font-size: 11px; }
 .nn-title { font-size: 14px; font-weight: 650; letter-spacing: 0.5px; }
 .nn-close { cursor:pointer; color: var(--nn-text-dim); font-size: 16px; line-height:1; padding: 4px 6px; border-radius: 8px; }
 .nn-close:hover { color: var(--nn-text); background: rgba(255,255,255,0.06); }
@@ -156,7 +158,10 @@ async function nnCreateCard({ id, title, width = 420, anchor = "center" }) {
 
   card.innerHTML = `
     <div class="nn-header" data-nn-drag>
-      <div class="nn-title"></div>
+      <div class="nn-header-left">
+        <div class="nn-brand" aria-label="NOVIA">NOVIA</div>
+        <div class="nn-title"></div>
+      </div>
       <div class="nn-close" data-nn-close aria-label="Close">✕</div>
     </div>
     <div class="nn-body" data-nn-body></div>
