@@ -17,9 +17,14 @@ function ensureOverlayHost() {
   return host;
 }
 
-async function loadCssText(url) {
-  const res = await fetch(url);
-  return await res.text();
+function ensureThemeCss(shadow) {
+  if (shadow.getElementById("nn-theme-link")) return;
+  const cssUrl = chrome.runtime.getURL("src/ui/theme.css");
+  const linkEl = document.createElement("link");
+  linkEl.id = "nn-theme-link";
+  linkEl.rel = "stylesheet";
+  linkEl.href = cssUrl;
+  shadow.prepend(linkEl);
 }
 
 function makeDraggable({ dragHandleEl, targetEl }) {
@@ -77,13 +82,7 @@ async function ensureOverlay() {
   }
 
   // Ensure theme CSS is loaded once
-  if (!shadow.getElementById("nn-theme-style")) {
-    const styleEl = document.createElement("style");
-    styleEl.id = "nn-theme-style";
-    const cssUrl = chrome.runtime.getURL("src/ui/theme.css");
-    styleEl.textContent = await loadCssText(cssUrl);
-    shadow.prepend(styleEl);
-  }
+  ensureThemeCss(shadow);
 
   return { host, shadow, overlay };
 }
