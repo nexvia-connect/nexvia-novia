@@ -82,8 +82,8 @@ function setTab(tab) {
   if (rootTitle) rootTitle.textContent = isAssist ? "Assist" : "Enhancements";
   if (rootSubtitle) {
     rootSubtitle.textContent = isAssist
-      ? "Active workflows and actions your team uses daily"
-      : "Quiet page improvements, chips, cleaners, micro-UI that stays out of the way";
+      ? "Active workflows and actions"
+      : "Page improvements";
   }
 }
 
