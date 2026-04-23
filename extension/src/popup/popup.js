@@ -1,12 +1,12 @@
 const TOOLS = [
   {
     key: "tool.listingFindHelper",
-    name: "Listing found popup",
+    name: "Listing Finder",
     desc: "Imm otop / AtHome / Wortimmo: show popup when a listing is found"
   },
   {
     key: "tool.listingPageFormatCommand",
-    name: "Format upgrade",
+    name: "Format Changer",
     desc: "pro.immotop.lu: apply formats via upgrade=..."
   }
 ];
