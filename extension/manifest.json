@@ -15,7 +15,8 @@
     "https://*.immotop.lu/*",
     "https://pro.immotop.lu/*",
     "https://*.athome.lu/*",
-    "https://*.wortimmo.lu/*"
+    "https://*.wortimmo.lu/*",
+    "https://www.nexvia.lu/*"
   ],
   "background": {
     "service_worker": "src/background/service-worker.js",
@@ -50,6 +51,15 @@
       "js": [
         "src/ui/overlay.js",
         "src/content/listing-page-format-command.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.nexvia.lu/buy*"
+      ],
+      "js": [
+        "src/content/add-agent-to-nexvia-site.js"
       ],
       "run_at": "document_idle"
     }
