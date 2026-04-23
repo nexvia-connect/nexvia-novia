@@ -63,9 +63,9 @@
 
     const card = await window.NexviaNoviaUI.createCard({
       id: "listing-format-command",
-      title: "Action Center",
+      title: "Format upgrade",
       width: 480,
-      anchor: "top-right"
+      anchor: "center"
     });
 
     const body = window.NexviaNoviaUI.getBody(card);
