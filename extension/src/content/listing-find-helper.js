@@ -105,6 +105,39 @@
     wireCopyButton({ buttonEl: copyBtn, tooltipEl: tooltip, url });
   }
 
+  async function ensureFindStatusCard({ hasMatch }) {
+    if (!window.NexviaNoviaUI?.createCard) return;
+    if (!findId) return;
+    if (window.location.hostname !== "pro.immotop.lu") return;
+    if (!window.location.pathname.startsWith("/my-listings")) return;
+
+    const card = await window.NexviaNoviaUI.createCard({
+      id: "listing-find-status",
+      title: "Find mode",
+      width: 360,
+      anchor: "top-right"
+    });
+
+    const body = window.NexviaNoviaUI.getBody(card);
+    body.innerHTML = `
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom: 12px;">
+        <span class="nn-badge nn-active">find=${findId}</span>
+        <span style="color: var(--nn-text-dim); font-size: 12px;">
+          ${hasMatch ? "Match found" : "Scanning page..."}
+        </span>
+      </div>
+      <div class="nn-row">
+        <button class="nn-btn nn-btn-ghost" data-nn-clear style="flex:1;">CLEAR FIND</button>
+      </div>
+    `;
+
+    body.querySelector("[data-nn-clear]")?.addEventListener("click", () => {
+      findId = null;
+      sessionStorage.removeItem("immotop_find_id");
+      card.remove();
+    });
+  }
+
   function enforceFind() {
     if (!findId) return;
 
@@ -176,7 +209,9 @@
       }
     }
 
+    const hasMatch = Boolean(triggerPopupUrl);
     if (triggerPopupUrl) createPopup(triggerPopupUrl, triggerPopupImg);
+    ensureFindStatusCard({ hasMatch });
   }
 
   function initApp() {
