@@ -16,7 +16,10 @@
     "https://pro.immotop.lu/*",
     "https://*.athome.lu/*",
     "https://*.wortimmo.lu/*",
-    "https://www.nexvia.lu/*"
+    "https://www.nexvia.lu/*",
+    "https://*.easy-serveur53.com/*",
+    "https://fonts.googleapis.com/*",
+    "https://nexvia-connect.github.io/*"
   ],
   "background": {
     "service_worker": "src/background/service-worker.js",
@@ -60,6 +63,15 @@
       ],
       "js": [
         "src/content/add-agent-to-nexvia-site.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://nexvia1832.easy-serveur53.com/*"
+      ],
+      "js": [
+        "src/cleaners/easy-ui-cleaner.js"
       ],
       "run_at": "document_idle"
     }
