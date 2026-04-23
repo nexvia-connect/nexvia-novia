@@ -96,11 +96,8 @@
       </div>
     `;
 
-    // Close hook (clear stored state like original)
-    card.querySelector("[data-nn-close]")?.addEventListener("click", () => {
-      sessionStorage.removeItem(ID_STORAGE_KEY);
-      sessionStorage.removeItem(LOG_STORAGE_KEY);
-    });
+    // Close/minimize is handled by shared UI (NOVIA pill).
+    // Keep state so user can restore and continue.
 
     const badgeMap = {};
     body.querySelectorAll("[data-nn-badge]").forEach((el) => {
