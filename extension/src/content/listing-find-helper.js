@@ -1,9 +1,17 @@
-(function () {
+(async function () {
   "use strict";
 
   // Prevent double-injection
   if (window.nnListingFindLoaded) return;
   window.nnListingFindLoaded = true;
+
+  const TOOL_KEY = "tool.listingFindHelper";
+  try {
+    const enabled = (await chrome.storage.sync.get({ [TOOL_KEY]: true }))[TOOL_KEY];
+    if (!enabled) return;
+  } catch {
+    // if storage fails, default to enabled
+  }
 
   let findId = null;
 
