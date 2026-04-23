@@ -93,10 +93,7 @@
     if (body.dataset.nnInit === "true") return;
     body.dataset.nnInit = "true";
 
-    card.querySelector("[data-nn-close]")?.addEventListener("click", () => {
-      findId = null;
-      sessionStorage.removeItem("immotop_find_id");
-    });
+    // Close/minimize is handled by shared UI (NOVIA pill). Do not clear state here.
 
     body.innerHTML = `
       ${imgSrc ? `<img class="nn-img" src="${imgSrc}" alt="Listing image" />` : ""}
