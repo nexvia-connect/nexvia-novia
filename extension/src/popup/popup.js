@@ -2,12 +2,12 @@ const ASSIST = [
   {
     key: "tool.listingFindHelper",
     name: "Listing Finder",
-    desc: "Imm otop / AtHome / Wortimmo: show popup when a listing is found"
+    desc: "Helps find the right listing on a page"
   },
   {
     key: "tool.listingPageFormatCommand",
     name: "Format Changer",
-    desc: "pro.immotop.lu: apply formats via upgrade=..."
+    desc: "Automatically upgrade and downgrade listing formats"
   }
 ];
 
@@ -15,12 +15,12 @@ const ENHANCEMENTS = [
   {
     key: "tool.addAgentToNexviaSite",
     name: "Agent Chip",
-    desc: "nexvia.lu/buy: add a small portrait chip; click copies the agent email"
+    desc: "Adds the agent pill to listings"
   },
   {
     key: "tool.easyUiCleanerV321",
     name: "Easy Cleaner",
-    desc: "easy-serveur: hide noisy form blocks; includes remote defaults + editor"
+    desc: "Cleans up Easy for easier navigation"
   }
 ];
 
