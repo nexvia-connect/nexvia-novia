@@ -1,4 +1,4 @@
-const TOOLS = [
+const ASSIST = [
   {
     key: "tool.listingFindHelper",
     name: "Listing Finder",
@@ -8,19 +8,19 @@ const TOOLS = [
     key: "tool.listingPageFormatCommand",
     name: "Format Changer",
     desc: "pro.immotop.lu: apply formats via upgrade=..."
-  },
-  {
-    key: "tool.addAgentToNexviaSite",
-    name: "Add Agent to Nexvia Site",
-    desc: "nexvia.lu/buy: add agent portrait button that copies agent email"
   }
 ];
 
-const CLEANERS = [
+const ENHANCEMENTS = [
+  {
+    key: "tool.addAgentToNexviaSite",
+    name: "Agent contact chip (Nexvia Buy)",
+    desc: "nexvia.lu/buy: add a small portrait chip; click copies the agent email"
+  },
   {
     key: "tool.easyUiCleanerV321",
-    name: "Easy UI cleaner (v3.21)",
-    desc: "easy-serveur: hide form blocks + per-element toggles (remote defaults + CSS)"
+    name: "Easy UI field cleaner (v3.21)",
+    desc: "easy-serveur: hide noisy form blocks; includes remote defaults + editor"
   }
 ];
 
@@ -37,7 +37,7 @@ function el(tag, attrs = {}, children = []) {
 
 async function getToolStates() {
   const defaults = Object.fromEntries(
-    TOOLS.map((t) => [t.key, true]).concat(CLEANERS.map((t) => [t.key, true]))
+    ASSIST.map((t) => [t.key, true]).concat(ENHANCEMENTS.map((t) => [t.key, true]))
   );
   const res = await chrome.storage.sync.get(defaults);
   return res;
@@ -69,22 +69,28 @@ function renderToolRow(tool, enabled) {
 }
 
 function setTab(tab) {
-  const isTools = tab === "tools";
-  document.getElementById("tabTools")?.classList.toggle("is-active", isTools);
-  document.getElementById("tabCleaners")?.classList.toggle("is-active", !isTools);
-  document.getElementById("tabTools")?.setAttribute("aria-selected", isTools ? "true" : "false");
-  document.getElementById("tabCleaners")?.setAttribute("aria-selected", isTools ? "false" : "true");
+  const isAssist = tab === "assist";
+  document.getElementById("tabAssist")?.classList.toggle("is-active", isAssist);
+  document.getElementById("tabEnhancements")?.classList.toggle("is-active", !isAssist);
+  document.getElementById("tabAssist")?.setAttribute("aria-selected", isAssist ? "true" : "false");
+  document.getElementById("tabEnhancements")?.setAttribute("aria-selected", isAssist ? "false" : "true");
 
-  document.getElementById("panelTools").hidden = !isTools;
-  document.getElementById("panelCleaners").hidden = isTools;
+  document.getElementById("panelAssist").hidden = !isAssist;
+  document.getElementById("panelEnhancements").hidden = isAssist;
   const rootTitle = document.getElementById("rootTitle");
-  if (rootTitle) rootTitle.textContent = isTools ? "Tools" : "Cleaners";
+  const rootSubtitle = document.getElementById("rootSubtitle");
+  if (rootTitle) rootTitle.textContent = isAssist ? "Assist" : "Enhancements";
+  if (rootSubtitle) {
+    rootSubtitle.textContent = isAssist
+      ? "Active workflows (popups and actions your team uses daily)"
+      : "Quiet page improvements (chips, cleaners, micro-UI that stays out of the way)";
+  }
 }
 
 function getCurrentTab() {
-  const cleanersHidden = document.getElementById("panelCleaners")?.hidden;
-  if (typeof cleanersHidden === "boolean" && !cleanersHidden) return "cleaners";
-  return "tools";
+  const enhancementsHidden = document.getElementById("panelEnhancements")?.hidden;
+  if (typeof enhancementsHidden === "boolean" && !enhancementsHidden) return "enhancements";
+  return "assist";
 }
 
 async function render() {
@@ -94,12 +100,25 @@ async function render() {
   cleaners.innerHTML = "";
 
   const states = await getToolStates();
-  TOOLS.forEach((tool) => tools.appendChild(renderToolRow(tool, states[tool.key])));
-  CLEANERS.forEach((tool) => cleaners.appendChild(renderToolRow(tool, states[tool.key])));
+  ASSIST.forEach((tool) => tools.appendChild(renderToolRow(tool, states[tool.key])));
+  ENHANCEMENTS.forEach((tool) => cleaners.appendChild(renderToolRow(tool, states[tool.key])));
 
   // restore last tab
-  const saved = (await chrome.storage.local.get({ nnPopupTab: "tools" })).nnPopupTab;
+  const raw = (await chrome.storage.local.get({ nnPopupTab: "assist" })).nnPopupTab;
+  // migrate old tab ids
+  const saved =
+    raw === "tools"
+      ? "assist"
+      : raw === "cleaners"
+        ? "enhancements"
+        : raw === "assist" || raw === "enhancements"
+          ? raw
+          : "assist";
+
   setTab(saved);
+  if (raw !== saved) {
+    await chrome.storage.local.set({ nnPopupTab: saved });
+  }
 
   const enableKeyset = (keys, on) => {
     const next = {};
@@ -107,25 +126,25 @@ async function render() {
     return next;
   };
 
-  document.getElementById("tabTools").onclick = async () => {
-    setTab("tools");
-    await chrome.storage.local.set({ nnPopupTab: "tools" });
+  document.getElementById("tabAssist").onclick = async () => {
+    setTab("assist");
+    await chrome.storage.local.set({ nnPopupTab: "assist" });
   };
-  document.getElementById("tabCleaners").onclick = async () => {
-    setTab("cleaners");
-    await chrome.storage.local.set({ nnPopupTab: "cleaners" });
+  document.getElementById("tabEnhancements").onclick = async () => {
+    setTab("enhancements");
+    await chrome.storage.local.set({ nnPopupTab: "enhancements" });
   };
 
   document.getElementById("enableAll").onclick = async () => {
     const tab = getCurrentTab();
-    if (tab === "tools") await setToolStates(enableKeyset(TOOLS.map((t) => t.key), true));
-    else await setToolStates(enableKeyset(CLEANERS.map((t) => t.key), true));
+    if (tab === "assist") await setToolStates(enableKeyset(ASSIST.map((t) => t.key), true));
+    else await setToolStates(enableKeyset(ENHANCEMENTS.map((t) => t.key), true));
     await render();
   };
   document.getElementById("disableAll").onclick = async () => {
     const tab = getCurrentTab();
-    if (tab === "tools") await setToolStates(enableKeyset(TOOLS.map((t) => t.key), false));
-    else await setToolStates(enableKeyset(CLEANERS.map((t) => t.key), false));
+    if (tab === "assist") await setToolStates(enableKeyset(ASSIST.map((t) => t.key), false));
+    else await setToolStates(enableKeyset(ENHANCEMENTS.map((t) => t.key), false));
     await render();
   };
 }
