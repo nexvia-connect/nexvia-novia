@@ -6,7 +6,7 @@ const TOOLS = [
   },
   {
     key: "tool.listingPageFormatCommand",
-    name: "Immotop Action Center",
+    name: "Format upgrade",
     desc: "pro.immotop.lu: apply formats via upgrade=..."
   }
 ];
