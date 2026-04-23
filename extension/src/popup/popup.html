@@ -11,11 +11,20 @@
       <div class="header">
         <div class="header-left">
           <div class="brand">NOVIA</div>
-          <div class="title">Tools</div>
+          <div class="title" id="rootTitle">Settings</div>
         </div>
       </div>
+      <div class="tabbar" role="tablist" aria-label="Nexvia Novia">
+        <button id="tabTools" class="tab is-active" type="button" role="tab" aria-selected="true">Tools</button>
+        <button id="tabCleaners" class="tab" type="button" role="tab" aria-selected="false">Cleaners</button>
+      </div>
       <div class="body">
-        <div id="tools" class="tools"></div>
+        <div id="panelTools" class="tabpanel" role="tabpanel">
+          <div id="tools" class="tools"></div>
+        </div>
+        <div id="panelCleaners" class="tabpanel" role="tabpanel" hidden>
+          <div id="cleaners" class="tools"></div>
+        </div>
         <div class="footer">
           <button id="enableAll" class="btn btn-ghost" type="button">Enable all</button>
           <button id="disableAll" class="btn btn-ghost" type="button">Disable all</button>
