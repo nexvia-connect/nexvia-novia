@@ -68,7 +68,37 @@ body {
 
 .body { padding: 14px 16px 16px 16px; }
 
+.tabbar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--nn-border);
+  background: #161616;
+}
+
+.tab {
+  flex: 1;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--nn-text-dim);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  border-bottom: 2px solid transparent;
+}
+.tab:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--nn-text);
+}
+.tab.is-active {
+  color: var(--nn-text);
+  border-bottom-color: rgba(16, 163, 127, 0.8);
+  background: rgba(255,255,255,0.03);
+}
+
 .tools { display: flex; flex-direction: column; gap: 10px; }
+.tabpanel[hidden] { display: none; }
 
 .tool {
   display: flex;
