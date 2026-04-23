@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "Nexvia support helpers for targeted websites (private/internal).",
   "action": {
-    "default_title": "Nexvia Novia"
+    "default_title": "Nexvia Novia",
+    "default_popup": "src/popup/popup.html"
   },
   "permissions": [
     "storage",
