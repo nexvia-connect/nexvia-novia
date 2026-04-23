@@ -17,7 +17,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: #0f0f10;
+  /* Match the popup surface; avoids the “black rounded corner fringe” you see in Chrome popups */
+  background: var(--nn-panel);
   color: var(--nn-text);
   font-family: var(--nn-font);
 }
@@ -27,10 +28,11 @@ body {
 }
 
 .card {
-  border: 1px solid var(--nn-border);
+  border: 0;
   background: var(--nn-panel);
-  border-radius: var(--nn-radius);
-  box-shadow: var(--nn-shadow);
+  /* Chrome’s action popup is already a rounded window; keep our UI square inside it */
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 
