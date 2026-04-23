@@ -16,6 +16,14 @@ const TOOLS = [
   }
 ];
 
+const CLEANERS = [
+  {
+    key: "tool.easyUiCleanerV321",
+    name: "Easy UI cleaner (v3.21)",
+    desc: "easy-serveur: hide form blocks + per-element toggles (remote defaults + CSS)"
+  }
+];
+
 function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag);
   Object.entries(attrs).forEach(([k, v]) => {
@@ -28,7 +36,9 @@ function el(tag, attrs = {}, children = []) {
 }
 
 async function getToolStates() {
-  const defaults = Object.fromEntries(TOOLS.map((t) => [t.key, true]));
+  const defaults = Object.fromEntries(
+    TOOLS.map((t) => [t.key, true]).concat(CLEANERS.map((t) => [t.key, true]))
+  );
   const res = await chrome.storage.sync.get(defaults);
   return res;
 }
@@ -58,19 +68,64 @@ function renderToolRow(tool, enabled) {
   return el("div", { class: "tool" }, [left, label]);
 }
 
+function setTab(tab) {
+  const isTools = tab === "tools";
+  document.getElementById("tabTools")?.classList.toggle("is-active", isTools);
+  document.getElementById("tabCleaners")?.classList.toggle("is-active", !isTools);
+  document.getElementById("tabTools")?.setAttribute("aria-selected", isTools ? "true" : "false");
+  document.getElementById("tabCleaners")?.setAttribute("aria-selected", isTools ? "false" : "true");
+
+  document.getElementById("panelTools").hidden = !isTools;
+  document.getElementById("panelCleaners").hidden = isTools;
+  const rootTitle = document.getElementById("rootTitle");
+  if (rootTitle) rootTitle.textContent = isTools ? "Tools" : "Cleaners";
+}
+
+function getCurrentTab() {
+  const cleanersHidden = document.getElementById("panelCleaners")?.hidden;
+  if (typeof cleanersHidden === "boolean" && !cleanersHidden) return "cleaners";
+  return "tools";
+}
+
 async function render() {
-  const container = document.getElementById("tools");
-  container.innerHTML = "";
+  const tools = document.getElementById("tools");
+  const cleaners = document.getElementById("cleaners");
+  tools.innerHTML = "";
+  cleaners.innerHTML = "";
 
   const states = await getToolStates();
-  TOOLS.forEach((tool) => container.appendChild(renderToolRow(tool, states[tool.key])));
+  TOOLS.forEach((tool) => tools.appendChild(renderToolRow(tool, states[tool.key])));
+  CLEANERS.forEach((tool) => cleaners.appendChild(renderToolRow(tool, states[tool.key])));
+
+  // restore last tab
+  const saved = (await chrome.storage.local.get({ nnPopupTab: "tools" })).nnPopupTab;
+  setTab(saved);
+
+  const enableKeyset = (keys, on) => {
+    const next = {};
+    keys.forEach((k) => (next[k] = on));
+    return next;
+  };
+
+  document.getElementById("tabTools").onclick = async () => {
+    setTab("tools");
+    await chrome.storage.local.set({ nnPopupTab: "tools" });
+  };
+  document.getElementById("tabCleaners").onclick = async () => {
+    setTab("cleaners");
+    await chrome.storage.local.set({ nnPopupTab: "cleaners" });
+  };
 
   document.getElementById("enableAll").onclick = async () => {
-    await setToolStates(Object.fromEntries(TOOLS.map((t) => [t.key, true])));
+    const tab = getCurrentTab();
+    if (tab === "tools") await setToolStates(enableKeyset(TOOLS.map((t) => t.key), true));
+    else await setToolStates(enableKeyset(CLEANERS.map((t) => t.key), true));
     await render();
   };
   document.getElementById("disableAll").onclick = async () => {
-    await setToolStates(Object.fromEntries(TOOLS.map((t) => [t.key, false])));
+    const tab = getCurrentTab();
+    if (tab === "tools") await setToolStates(enableKeyset(TOOLS.map((t) => t.key), false));
+    else await setToolStates(enableKeyset(CLEANERS.map((t) => t.key), false));
     await render();
   };
 }
