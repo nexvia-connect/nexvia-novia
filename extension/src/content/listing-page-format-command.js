@@ -58,6 +58,75 @@
     sessionStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
   };
 
+  function markTargetDone(ui, publicId) {
+    const el = ui.badgeMap?.[publicId];
+    if (el) el.classList.add("nn-active");
+  }
+
+  function findMatchedPublicId(internalId, publicUrl) {
+    return upgrades.find((id) => internalId.includes(id) || publicUrl.includes(id)) || null;
+  }
+
+  async function scanListings() {
+    let toUpgrade = [];
+    let toDowngrade = [];
+    let page = 1;
+    let keepScanning = true;
+
+    while (keepScanning && page <= 50) {
+      try {
+        const res = await fetch(`https://pro.immotop.lu/my-listings/index${page}.html`);
+        if (!res.ok || res.redirected) {
+          keepScanning = false;
+          break;
+        }
+
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const listings = doc.querySelectorAll(".search-agency-item-container");
+
+        if (listings.length === 0) {
+          keepScanning = false;
+          break;
+        }
+
+        listings.forEach((row) => {
+          const internalId = row.getAttribute("data-id") || "";
+          const publicUrl = row.querySelector("a.domingo")?.href || "";
+          const isFirst = row.querySelector('button[data-role="featured"]')?.classList.contains("active");
+
+          const matchedPublicId = findMatchedPublicId(internalId, publicUrl);
+
+          if (matchedPublicId) {
+            if (!isFirst) toUpgrade.push({ internalId, publicId: matchedPublicId });
+            // If it's already in the "first" slot, treat as done for the pill UI.
+            // (This is what the user wants to see as green *before* clicking start.)
+            // We'll also mark again after a successful apply.
+          } else if (isFirst) {
+            toDowngrade.push(internalId);
+          }
+        });
+
+        page++;
+      } catch (e) {
+        keepScanning = false;
+      }
+    }
+
+    return { toUpgrade, toDowngrade, scannedPages: page - 1 };
+  }
+
+  async function markAlreadyFeaturedTargets(ui) {
+    // Lightweight scan: only used to mark greens for targets already in first slot
+    const { toUpgrade, toDowngrade: _d } = await scanListings();
+    const notDone = new Set(toUpgrade.map((x) => x.publicId));
+    for (const id of upgrades) {
+      if (!notDone.has(id)) {
+        markTargetDone(ui, id);
+      }
+    }
+  }
+
   async function sendCommand(internalId, pName) {
     const body = `h_ajax=1&pName=${encodeURIComponent(pName)}&pArgs%5B0%5D=${encodeURIComponent(internalId)}`;
     await fetch(window.location.href, {
@@ -114,50 +183,14 @@
     startBtn.disabled = true;
     copyBtn.disabled = true;
 
-    let toUpgrade = [];
-    let toDowngrade = [];
-    let page = 1;
-    let keepScanning = true;
-
     addLog("Sync started: Mapping listings to internal IDs...", "up");
-
-    while (keepScanning && page <= 50) {
-      startBtn.textContent = `MAPPING PAGE ${page}...`;
-      try {
-        const res = await fetch(`https://pro.immotop.lu/my-listings/index${page}.html`);
-        if (!res.ok || res.redirected) {
-          addLog(`Scan complete at page ${page - 1}.`);
-          keepScanning = false;
-          break;
-        }
-
-        const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, "text/html");
-        const listings = doc.querySelectorAll(".search-agency-item-container");
-
-        if (listings.length === 0) {
-          keepScanning = false;
-          break;
-        }
-
-        listings.forEach((row) => {
-          const internalId = row.getAttribute("data-id") || "";
-          const publicUrl = row.querySelector("a.domingo")?.href || "";
-          const isFirst = row.querySelector('button[data-role="featured"]')?.classList.contains("active");
-
-          const matchedPublicId = upgrades.find((id) => internalId.includes(id) || publicUrl.includes(id));
-
-          if (matchedPublicId) {
-            if (!isFirst) toUpgrade.push({ internalId, publicId: matchedPublicId });
-            else ui.badgeMap?.[matchedPublicId]?.classList.add("nn-active");
-          } else if (isFirst) {
-            toDowngrade.push(internalId);
-          }
-        });
-
-        page++;
-      } catch (e) {
-        keepScanning = false;
+    const scan = await scanListings();
+    const toDowngrade = scan.toDowngrade;
+    const toUpgrade = scan.toUpgrade;
+    // Pre-mark "already in first" targets
+    for (const id of upgrades) {
+      if (!toUpgrade.find((x) => x.publicId === id)) {
+        markTargetDone(ui, id);
       }
     }
 
@@ -173,7 +206,7 @@
       addLog(`Upgrading target: ${item.publicId}`, "up");
       await sendCommand(item.internalId, "chListingFeat");
       await sendCommand(item.internalId, "vis_ad_refresh");
-      ui.badgeMap?.[item.publicId]?.classList.add("nn-active");
+      markTargetDone(ui, item.publicId);
       await new Promise((r) => setTimeout(r, DELAY));
     }
 
@@ -185,6 +218,13 @@
   (async function init() {
     const ui = await renderUI();
     if (!ui) return;
+
+    // Show greens immediately for targets that are already mapped + featured
+    try {
+      await markAlreadyFeaturedTargets(ui);
+    } catch {
+      // ignore
+    }
 
     ui.body.querySelector("[data-nn-start]").addEventListener("click", () => processSync(ui));
 
