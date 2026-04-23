@@ -83,7 +83,7 @@
 
     const card = await window.NexviaNoviaUI.createCard({
       id: "listing-find-popup",
-      title: "Listing Found",
+      title: "Listing Finder",
       width: 420,
       anchor: "center"
     });
