@@ -1,8 +1,16 @@
-(function () {
+(async function () {
   "use strict";
 
   if (window.nnListingFormatCmdLoaded) return;
   window.nnListingFormatCmdLoaded = true;
+
+  const TOOL_KEY = "tool.listingPageFormatCommand";
+  try {
+    const enabled = (await chrome.storage.sync.get({ [TOOL_KEY]: true }))[TOOL_KEY];
+    if (!enabled) return;
+  } catch {
+    // if storage fails, default to enabled
+  }
 
   const LOG_STORAGE_KEY = "immo_sync_logs";
   const ID_STORAGE_KEY = "immo_cmd_up_session";
