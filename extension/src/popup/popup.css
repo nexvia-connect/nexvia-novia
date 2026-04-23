@@ -26,7 +26,7 @@ html, body {
 
 body {
   /* Wider so tool names + descriptions + toggles don’t feel cramped */
-  width: 420px;
+  width: 520px;
 }
 
 .card {
@@ -142,7 +142,7 @@ body {
 .pill {
   width: 38px;
   height: 22px;
-  border-radius: 0;
+  border-radius: 999px;
   border: 1px solid var(--nn-border-2);
   background: #1a1a1a;
   position: relative;
@@ -153,11 +153,11 @@ body {
   content: "";
   position: absolute;
   top: 50%;
-  left: 2px;
+  left: 3px;
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  border-radius: 0;
+  border-radius: 50%;
   background: #bdbdbd;
   transition: left 0.18s ease, background 0.18s ease;
 }
@@ -168,32 +168,6 @@ body {
 }
 
 .switch input:checked + .pill::after {
-  left: 20px;
+  left: 19px;
   background: var(--nn-green-2);
 }
-
-.footer {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.btn {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 0;
-  border: 1px solid var(--nn-border-2);
-  background: transparent;
-  color: var(--nn-text-dim);
-  cursor: pointer;
-  font-weight: 750;
-  font-size: 12px;
-  letter-spacing: 0.3px;
-  flex: 1;
-}
-.btn:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: #555;
-  color: var(--nn-text);
-}
-
