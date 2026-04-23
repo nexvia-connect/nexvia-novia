@@ -18,6 +18,18 @@
   // Keep your original behavior
   localStorage.removeItem("immo_cmd_up");
 
+  // Never show Format upgrade UI while in find mode.
+  // This also prevents stale sessionStorage upgrades from showing up on ?find= pages.
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("find")) {
+      sessionStorage.removeItem(ID_STORAGE_KEY);
+      return;
+    }
+  } catch {
+    // ignore
+  }
+
   function getIdsFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const upgradeString = params.get("upgrade") || "";
