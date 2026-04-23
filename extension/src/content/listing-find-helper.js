@@ -31,15 +31,16 @@
     const queryParams = searchStr.replace("?", "").split("&").filter(Boolean);
     const findParam = queryParams.find((param) => param.startsWith("find="));
 
-    if (findParam) {
-      findId = findParam.split("=")[1];
-      sessionStorage.setItem("immotop_find_id", findId);
-      return;
-    }
-
+    // If we're in upgrade/downgrade mode, force-disable find mode for this tab.
     if (queryParams.some((p) => p.startsWith("upgrade=") || p.startsWith("downgrade="))) {
       sessionStorage.removeItem("immotop_find_id");
       findId = null;
+      return;
+    }
+
+    if (findParam) {
+      findId = findParam.split("=")[1];
+      sessionStorage.setItem("immotop_find_id", findId);
       return;
     }
 
